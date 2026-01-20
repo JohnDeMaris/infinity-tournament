@@ -19,6 +19,8 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { SocialLoginButtons } from '@/components/auth/social-login-buttons';
+import { CsrfInput } from '@/components/ui/csrf-input';
 
 export function LoginForm() {
   const router = useRouter();
@@ -67,6 +69,7 @@ export function LoginForm() {
       </CardHeader>
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="space-y-4">
+          <CsrfInput />
           {error && (
             <Alert variant="destructive">
               <AlertDescription>{error}</AlertDescription>
@@ -115,6 +118,9 @@ export function LoginForm() {
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? 'Signing in...' : 'Sign in'}
           </Button>
+
+          <SocialLoginButtons />
+
           <p className="text-sm text-center text-muted-foreground">
             Don&apos;t have an account?{' '}
             <Link href="/register" className="text-primary hover:underline">

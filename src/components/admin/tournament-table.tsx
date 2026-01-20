@@ -4,6 +4,7 @@ import { useState, useTransition, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { deleteTournament } from '@/lib/admin/actions';
+import { useCsrfToken } from '@/hooks/use-csrf-token';
 import type { TournamentStatus } from '@/types/database';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -85,6 +86,7 @@ export function TournamentTable({ tournaments }: TournamentTableProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<TournamentStatus | 'all'>('all');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const { token: csrfToken } = useCsrfToken();
 
   const filteredTournaments = useMemo(() => {
     return tournaments.filter((tournament) => {
@@ -104,7 +106,7 @@ export function TournamentTable({ tournaments }: TournamentTableProps) {
   const handleDelete = async (tournamentId: string) => {
     setDeletingId(tournamentId);
     startTransition(async () => {
-      const result = await deleteTournament(tournamentId);
+      const result = await deleteTournament(tournamentId, csrfToken);
       if (result.success) {
         router.refresh();
       } else {

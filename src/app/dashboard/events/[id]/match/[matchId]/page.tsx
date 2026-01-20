@@ -26,7 +26,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
   // Get tournament
   const { data: tournament, error: tournamentError } = await supabase
     .from('tournaments')
-    .select('id, name, point_limit, status')
+    .select('id, name, point_limit, status, game_system_id')
     .eq('id', tournamentId)
     .single();
 
@@ -95,6 +95,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
         player1={player1!}
         player2={player2}
         tournamentPointLimit={tournament.point_limit}
+        gameSystemId={tournament.game_system_id || 'infinity'}
       />
     </div>
   );

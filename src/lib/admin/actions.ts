@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { validateCsrfOrThrow } from '@/lib/csrf';
 
 /**
  * Helper to log admin actions to the admin_logs table
@@ -63,8 +64,16 @@ async function verifyAdmin(
  * Suspend a user account
  */
 export async function suspendUser(
-  userId: string
+  userId: string,
+  csrfToken: string | null | undefined
 ): Promise<{ success: boolean; error?: string }> {
+  try {
+    // Validate CSRF token
+    await validateCsrfOrThrow(csrfToken);
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : 'CSRF validation failed' };
+  }
+
   const supabase = await createClient();
 
   // Verify admin access
@@ -114,8 +123,16 @@ export async function suspendUser(
  * Unsuspend a user account
  */
 export async function unsuspendUser(
-  userId: string
+  userId: string,
+  csrfToken: string | null | undefined
 ): Promise<{ success: boolean; error?: string }> {
+  try {
+    // Validate CSRF token
+    await validateCsrfOrThrow(csrfToken);
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : 'CSRF validation failed' };
+  }
+
   const supabase = await createClient();
 
   // Verify admin access
@@ -160,8 +177,16 @@ export async function unsuspendUser(
  * Delete a tournament (for spam cleanup)
  */
 export async function deleteTournament(
-  tournamentId: string
+  tournamentId: string,
+  csrfToken: string | null | undefined
 ): Promise<{ success: boolean; error?: string }> {
+  try {
+    // Validate CSRF token
+    await validateCsrfOrThrow(csrfToken);
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : 'CSRF validation failed' };
+  }
+
   const supabase = await createClient();
 
   // Verify admin access

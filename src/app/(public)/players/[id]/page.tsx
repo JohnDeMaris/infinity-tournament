@@ -6,12 +6,14 @@ import { PlayerStatsCard } from '@/components/stats/player-stats-card';
 import { FactionStatsTable } from '@/components/stats/faction-stats-table';
 import { TournamentHistoryList } from '@/components/stats/tournament-history-list';
 import { HeadToHeadTable } from '@/components/stats/head-to-head-table';
+import { AchievementGrid } from '@/components/achievements/achievement-grid';
 import {
   getPlayerStats,
   getPlayerFactionStats,
   getPlayerTournamentHistory,
   getAllHeadToHead,
 } from '@/lib/stats/player-stats';
+import { getPlayerAchievements } from '@/lib/achievements/player-achievements';
 
 interface PlayerProfilePageProps {
   params: Promise<{ id: string }>;
@@ -63,11 +65,12 @@ export default async function PlayerProfilePage({ params }: PlayerProfilePagePro
   }
 
   // Fetch all stats in parallel
-  const [overallStats, factionStats, tournamentHistory, headToHeadRecords] = await Promise.all([
+  const [overallStats, factionStats, tournamentHistory, headToHeadRecords, achievements] = await Promise.all([
     getPlayerStats(id),
     getPlayerFactionStats(id),
     getPlayerTournamentHistory(id),
     getAllHeadToHead(id),
+    getPlayerAchievements(id),
   ]);
 
   // Handle case where player exists but has no stats
@@ -106,6 +109,18 @@ export default async function PlayerProfilePage({ params }: PlayerProfilePagePro
                 <PlayerStatsCard stats={overallStats} />
               </section>
             )}
+
+            {/* Achievements */}
+            <section>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Achievements</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <AchievementGrid achievements={achievements} />
+                </CardContent>
+              </Card>
+            </section>
 
             {/* Faction Performance */}
             <section>

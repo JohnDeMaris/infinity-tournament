@@ -10,6 +10,7 @@ import {
   type CreateTournamentInput,
 } from '@/lib/validations/tournament';
 import { POINT_LIMITS } from '@/types';
+import { gameRegistry } from '@infinity-tournament/shared';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -31,6 +32,7 @@ import {
 } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
+import { CsrfInput } from '@/components/ui/csrf-input';
 
 export function CreateTournamentForm() {
   const router = useRouter();
@@ -48,6 +50,7 @@ export function CreateTournamentForm() {
   } = useForm<CreateTournamentInput>({
     resolver: zodResolver(createTournamentSchema) as any,
     defaultValues: {
+      game_system_id: 'infinity',
       point_limit: 300,
       rounds: 3,
       time_limit: 90,
@@ -62,7 +65,7 @@ export function CreateTournamentForm() {
     if (step === 1) {
       fieldsToValidate = ['name', 'date_start', 'location'];
     } else if (step === 2) {
-      fieldsToValidate = ['point_limit', 'rounds', 'time_limit'];
+      fieldsToValidate = ['game_system_id', 'point_limit', 'rounds', 'time_limit'];
     }
 
     const isValid = await trigger(fieldsToValidate);
@@ -131,6 +134,7 @@ export function CreateTournamentForm() {
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="space-y-4">
+          <CsrfInput />
           {error && (
             <Alert variant="destructive">
               <AlertDescription>{error}</AlertDescription>
@@ -199,6 +203,32 @@ export function CreateTournamentForm() {
           {/* Step 2: Format */}
           {step === 2 && (
             <>
+              <div className="space-y-2">
+                <Label htmlFor="game_system_id">Game System</Label>
+                <Select
+                  value={watch('game_system_id')}
+                  onValueChange={(v) =>
+                    setValue('game_system_id', v, { shouldValidate: true })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {gameRegistry.getAll().map((game) => (
+                      <SelectItem key={game.id} value={game.id}>
+                        {game.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.game_system_id && (
+                  <p className="text-sm text-destructive">
+                    {errors.game_system_id.message}
+                  </p>
+                )}
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="point_limit">Point Limit</Label>
                 <Select

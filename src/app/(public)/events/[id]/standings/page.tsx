@@ -102,7 +102,7 @@ export default async function StandingsPage({ params }: StandingsPageProps) {
   }
 
   // Calculate standings
-  const standings = calculateStandings(players, matches);
+  const standings = calculateStandings(players, matches, tournament.game_system_id);
 
   // Count completed rounds
   const { count: completedRounds } = await supabase

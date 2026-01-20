@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect } from 'react';
+import Link from 'next/link';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
+import * as Sentry from '@sentry/nextjs';
 
 export default function Error({
   error,
@@ -11,8 +13,9 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log the error to console (can be replaced with error tracking service)
+    // Log the error to console and send to Sentry
     console.error('Application error:', error);
+    Sentry.captureException(error);
   }, [error]);
 
   return (
@@ -47,13 +50,13 @@ export default function Error({
             <RefreshCw className="h-4 w-4" />
             Try again
           </button>
-          <a
+          <Link
             href="/"
             className="inline-flex items-center justify-center gap-2 px-4 py-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
           >
             <Home className="h-4 w-4" />
             Go home
-          </a>
+          </Link>
         </div>
       </div>
     </div>

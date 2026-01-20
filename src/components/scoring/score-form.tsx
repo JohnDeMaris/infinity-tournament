@@ -19,6 +19,7 @@ import { toast } from 'sonner';
 import { getGameSystem, parseMatchState, type MatchState } from '@infinity-tournament/shared/games';
 import { GameScoreField, validateScoreField } from './game-score-field';
 import { HiddenInfoPanel } from '@/components/match/hidden-info-panel';
+import { CsrfInput } from '@/components/ui/csrf-input';
 
 type SubmitStatus = 'idle' | 'submitting' | 'syncing' | 'success' | 'error';
 
@@ -175,56 +176,34 @@ export function ScoreForm({
     // Show optimistic toast
     const toastId = toast.loading('Saving scores...');
 
-    const supabase = createClient();
-
     // Build numeric scores object
     const numericScores: Record<string, number> = {};
     scoreFields.forEach((field) => {
       numericScores[field.name] = parseInt(myScores[field.name]) || 0;
     });
 
-    // Build scores JSONB update
-    const currentScores = match.scores || { player1: {}, player2: {} };
-    const newScores = isPlayer1
-      ? { ...currentScores, player1: numericScores }
-      : { ...currentScores, player2: numericScores };
-
-    // Build update data with both generic scores and legacy fields
-    const updateData: Record<string, unknown> = {
-      scores: newScores,
-      confirmation_status:
-        (isPlayer1 ? match.confirmed_by_p2 : match.confirmed_by_p1) || opponentData
-          ? 'partial'
-          : 'pending',
-    };
-
-    // Set confirmation flag
-    if (isPlayer1) {
-      updateData.confirmed_by_p1 = true;
-    } else {
-      updateData.confirmed_by_p2 = true;
-    }
-
-    // Also update legacy fields for backwards compatibility (Infinity only)
-    if (gameSystemId === 'infinity') {
-      const prefix = isPlayer1 ? 'player1' : 'player2';
-      if (numericScores.op !== undefined) updateData[`${prefix}_op`] = numericScores.op;
-      if (numericScores.vp !== undefined) updateData[`${prefix}_vp`] = numericScores.vp;
-      if (numericScores.ap !== undefined) updateData[`${prefix}_ap`] = numericScores.ap;
-    }
-
     try {
-      const { error: updateError } = await supabase
-        .from('matches')
-        .update(updateData)
-        .eq('id', match.id);
+      // Use server action with rate limiting
+      const { submitScores } = await import('@/lib/matches/actions');
+      const result = await submitScores({
+        matchId: match.id,
+        scores: numericScores,
+        isPlayer1,
+        gameSystemId,
+      });
 
-      if (updateError) {
+      if (!result.success) {
         // ROLLBACK: Revert optimistic state on error
         setOptimisticConfirmed(false);
         setSubmitStatus('error');
-        setError(updateError.message);
-        toast.error('Failed to save scores. Please try again.', { id: toastId });
+
+        if (result.rateLimitExceeded) {
+          setError('Too many score submissions. Please wait a moment and try again.');
+          toast.error('Rate limit exceeded. Please wait and try again.', { id: toastId });
+        } else {
+          setError(result.error || 'Failed to save scores');
+          toast.error(result.error || 'Failed to save scores. Please try again.', { id: toastId });
+        }
         return;
       }
 
@@ -244,81 +223,29 @@ export function ScoreForm({
     setSubmitStatus('syncing');
     const toastId = toast.loading('Confirming match...');
 
-    const supabase = createClient();
-
     try {
-      // Get fresh match data
-      const { data: freshMatch } = await supabase
-        .from('matches')
-        .select('*')
-        .eq('id', match.id)
-        .single();
-
-      if (!freshMatch) {
-        setError('Match not found');
-        setSubmitStatus('error');
-        toast.error('Match not found', { id: toastId });
-        return;
-      }
-
-      // Determine winner using game system's function
-      const matchScores = freshMatch.scores || {
-        player1: {
-          op: freshMatch.player1_op || 0,
-          vp: freshMatch.player1_vp || 0,
-          ap: freshMatch.player1_ap || 0,
-        },
-        player2: {
-          op: freshMatch.player2_op || 0,
-          vp: freshMatch.player2_vp || 0,
-          ap: freshMatch.player2_ap || 0,
-        },
-      };
-
-      const winnerId = gameSystem.scoring.determineWinner({
-        player1Id: freshMatch.player1_id,
-        player2Id: freshMatch.player2_id,
-        player1: matchScores.player1,
-        player2: matchScores.player2,
+      // Use server action with rate limiting
+      const { confirmMatch } = await import('@/lib/matches/actions');
+      const result = await confirmMatch({
+        matchId: match.id,
+        gameSystemId,
       });
 
-      const updateData: Record<string, unknown> = isPlayer1
-        ? { confirmed_by_p1: true }
-        : { confirmed_by_p2: true };
-
-      // Check if both confirmed
-      const bothConfirmed = isPlayer1
-        ? freshMatch.confirmed_by_p2
-        : freshMatch.confirmed_by_p1;
-
-      if (bothConfirmed) {
-        Object.assign(updateData, {
-          confirmation_status: 'completed',
-          winner_id: winnerId,
-        });
-      } else {
-        Object.assign(updateData, {
-          confirmation_status: 'partial',
-        });
-      }
-
-      const { error: updateError } = await supabase
-        .from('matches')
-        .update(updateData)
-        .eq('id', match.id);
-
-      if (updateError) {
-        setError(updateError.message);
+      if (!result.success) {
         setSubmitStatus('error');
-        toast.error('Failed to confirm match', { id: toastId });
+
+        if (result.rateLimitExceeded) {
+          setError('Too many requests. Please wait a moment and try again.');
+          toast.error('Rate limit exceeded. Please wait and try again.', { id: toastId });
+        } else {
+          setError(result.error || 'Failed to confirm match');
+          toast.error(result.error || 'Failed to confirm match', { id: toastId });
+        }
         return;
       }
 
       setSubmitStatus('success');
-      toast.success(
-        bothConfirmed ? 'Match confirmed!' : 'Waiting for opponent confirmation',
-        { id: toastId }
-      );
+      toast.success('Match confirmed!', { id: toastId });
       router.refresh();
     } catch (err) {
       setSubmitStatus('error');
@@ -359,6 +286,7 @@ export function ScoreForm({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        <CsrfInput />
         {error && (
           <Alert variant="destructive">
             <AlertDescription>{error}</AlertDescription>

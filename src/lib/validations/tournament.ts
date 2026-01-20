@@ -6,6 +6,7 @@ export const createTournamentSchema = z.object({
   date_start: z.string().min(1, 'Start date is required'),
   date_end: z.string().optional(),
   location: z.string().min(3, 'Location must be at least 3 characters'),
+  game_system_id: z.string().default('infinity'),
   point_limit: z.coerce.number().min(50).max(500),
   rounds: z.coerce.number().min(1).max(10),
   time_limit: z.coerce.number().min(30).max(240),

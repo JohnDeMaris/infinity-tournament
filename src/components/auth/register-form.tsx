@@ -19,6 +19,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { CsrfInput } from '@/components/ui/csrf-input';
 
 export function RegisterForm() {
   const router = useRouter();
@@ -70,6 +71,7 @@ export function RegisterForm() {
       </CardHeader>
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="space-y-4">
+          <CsrfInput />
           {error && (
             <Alert variant="destructive">
               <AlertDescription>{error}</AlertDescription>

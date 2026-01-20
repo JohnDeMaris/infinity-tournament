@@ -4,11 +4,11 @@ Generated from specifications in `specs/`. Updated by Wiggum Plan workflow.
 
 ## Summary
 
-**Specs processed:** OfflineFirst, GameSystemPlugin, RealTimePolish, HiddenInformation, ListValidation, PlayerStatistics, SpectatorMode, AdminDashboard, Notifications, **Stability-Hardening**
-**Total tasks:** 64
-**Completed:** 61
+**Specs processed:** OfflineFirst, GameSystemPlugin, RealTimePolish, HiddenInformation, ListValidation, PlayerStatistics, SpectatorMode, AdminDashboard, Notifications, Stability-Hardening, TechnicalDebt, **v1.1-v2-Roadmap**
+**Total tasks:** 109
+**Completed:** 101
 **In Progress:** 0
-**Pending:** 3
+**Pending:** 8
 
 ---
 
@@ -1255,6 +1255,15 @@ Add push event handlers to service worker.
 | P10-005 | Fix admin actions field mismatch | 2026-01-20 |
 | P10-007 | Add security headers to next.config.ts | 2026-01-20 |
 | P10-008 | Create error boundary components | 2026-01-20 |
+| P10-006 | Write admin actions tests (16 tests) | 2026-01-20 |
+| P10-009 | Safari PWA install prompt | 2026-01-20 |
+| P10-010 | GitHub Actions CI workflow | 2026-01-20 |
+| P10-011 | Install and configure Playwright | 2026-01-20 |
+| TD-001 | Fix migration naming collision | 2026-01-20 |
+| TD-002 | Complete RBAC middleware | 2026-01-20 |
+| TD-003 | Remove deprecated army parser | 2026-01-20 |
+| TD-004 | Enforce CSP headers | 2026-01-20 |
+| TD-005 | Add route-level error boundaries | 2026-01-20 |
 
 ---
 
@@ -1415,7 +1424,7 @@ Fix bug where admin actions check `is_suspended` but database uses `status` colu
 
 ### [P10-006] Write admin actions tests
 
-**Status:** [ ] PENDING
+**Status:** [x] COMPLETED
 **Spec:** `docs/PRD-Stability-Hardening.md` Feature 2
 **Size:** S
 **Depends on:** P10-002, P10-005
@@ -1481,7 +1490,7 @@ Add React error boundaries for graceful error handling.
 
 ### [P10-009] Create Safari PWA install prompt
 
-**Status:** [ ] PENDING
+**Status:** [x] COMPLETED
 **Spec:** `docs/PRD-Stability-Hardening.md` Feature 5
 **Size:** M
 **Depends on:** None
@@ -1506,7 +1515,7 @@ Prompt Safari users to install PWA to prevent 7-day IndexedDB eviction.
 
 ### [P10-010] Create GitHub Actions CI workflow
 
-**Status:** [ ] PENDING
+**Status:** [x] COMPLETED
 **Spec:** `docs/PRD-Stability-Hardening.md` Feature 1
 **Size:** S
 **Depends on:** P10-001
@@ -1529,7 +1538,7 @@ Create CI workflow that runs on every PR.
 
 ### [P10-011] Install and configure Playwright
 
-**Status:** [ ] PENDING
+**Status:** [x] COMPLETED
 **Spec:** `docs/PRD-Stability-Hardening.md` Feature 1
 **Size:** M
 **Depends on:** P10-010
@@ -1550,3 +1559,1018 @@ Set up Playwright for E2E testing foundation.
 - [ ] Webserver starts for tests
 - [ ] Example test passes
 - [ ] CI runs E2E tests
+
+---
+
+## Phase 11: Technical Debt (NEW)
+
+**Source PRD:** `docs/PRD-TechnicalDebt.md`
+**Spec:** `specs/TechnicalDebt.md`
+
+### [TD-001] Fix migration naming collision
+
+**Status:** [x] COMPLETED
+**Spec:** `specs/TechnicalDebt.md` TD-001
+**Size:** S
+**Depends on:** None
+
+**Description:**
+Rename migration files to have sequential, non-conflicting prefixes. Two files currently share `002_` prefix.
+
+**Files to Rename:**
+- `002_game_systems.sql` → `003_game_systems.sql`
+- `003_list_validation.sql` → `004_list_validation.sql`
+- `004_admin_dashboard.sql` → `005_admin_dashboard.sql`
+- `005_notifications.sql` → `006_notifications.sql`
+
+**Acceptance Criteria:**
+- [ ] All migrations have unique prefixes (001-006)
+- [ ] `supabase db reset` runs without errors
+- [ ] Data dependencies preserved
+
+---
+
+### [TD-002] Complete RBAC middleware
+
+**Status:** [x] COMPLETED
+**Spec:** `specs/TechnicalDebt.md` TD-002
+**Size:** M
+**Depends on:** None
+
+**Description:**
+Add role-based access control to middleware for TO-only and admin-only routes.
+
+**Files Modified:**
+- `src/lib/supabase/middleware.ts` - Add role check logic
+
+**Acceptance Criteria:**
+- [ ] Middleware fetches user role from JWT claims or database
+- [ ] `/to/*` routes reject non-TO users with redirect
+- [ ] `/admin/*` routes reject non-admin users with redirect
+- [ ] Helpful error message shown to unauthorized users
+
+---
+
+### [TD-003] Remove deprecated army parser
+
+**Status:** [x] COMPLETED
+**Spec:** `specs/TechnicalDebt.md` TD-003
+**Size:** S
+**Depends on:** None
+
+**Description:**
+Delete deprecated `src/lib/army/` directory and update any remaining imports to use shared package.
+
+**Files to Delete:**
+- `src/lib/army/parser.ts`
+- `src/lib/army/` directory
+
+**Files to Check/Update:**
+- Any files importing from `@/lib/army/`
+
+**Acceptance Criteria:**
+- [ ] `src/lib/army/` directory deleted
+- [ ] All imports updated to `@infinity-tournament/shared`
+- [ ] No runtime errors from missing imports
+
+---
+
+### [TD-004] Enforce CSP headers
+
+**Status:** [x] COMPLETED
+**Spec:** `specs/TechnicalDebt.md` TD-004
+**Size:** S
+**Depends on:** None
+
+**Description:**
+Change CSP from report-only to enforced mode.
+
+**Files Modified:**
+- `next.config.ts` - Change `Content-Security-Policy-Report-Only` to `Content-Security-Policy`
+
+**Acceptance Criteria:**
+- [ ] `Content-Security-Policy` header (not Report-Only)
+- [ ] All legitimate app functionality works
+- [ ] OBS overlay still functions
+- [ ] No console CSP violations in normal operation
+
+---
+
+### [TD-005] Add route-level error boundaries
+
+**Status:** [x] COMPLETED
+**Spec:** `specs/TechnicalDebt.md` TD-005
+**Size:** M
+**Depends on:** None
+
+**Description:**
+Ensure all major route groups have error.tsx files for graceful error handling.
+
+**Files to Create (if missing):**
+- `src/app/(auth)/error.tsx`
+- `src/app/(public)/error.tsx`
+- `src/app/dashboard/error.tsx`
+- `src/app/to/error.tsx`
+- `src/app/admin/error.tsx`
+
+**Acceptance Criteria:**
+- [ ] Each route group has error.tsx
+- [ ] Error pages show user-friendly message with retry
+- [ ] Navigation remains functional after error
+- [ ] Errors logged for debugging
+
+---
+
+## Phase A: Integration & Cleanup (v1.1 Roadmap)
+
+### [A-001] Add game system selector to create-tournament-form
+
+**Status:** [x] COMPLETED
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature A1
+**Size:** S
+**Depends on:** None
+
+**Description:**
+Add a game system dropdown to the tournament creation form. Database already has game_system_id column with default 'infinity'.
+
+**Files Modified:**
+- `src/components/tournament/create-tournament-form.tsx` - Add Select dropdown
+- `src/lib/validations/tournament.ts` - Add gameSystemId to schema
+
+**Acceptance Criteria:**
+- [ ] Dropdown shows available game systems (default: Infinity)
+- [ ] Form submits gameSystemId to database
+- [ ] Existing validation works
+
+---
+
+### [A-002] Wire gameSystemId to score-form component
+
+**Status:** [x] COMPLETED
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature A1
+**Size:** S
+**Depends on:** A-001
+
+**Description:**
+Pass gameSystemId from tournament to score form so it uses correct scoring fields.
+
+**Files Modified:**
+- `src/components/scoring/score-form.tsx` - Accept gameSystemId prop
+- `src/app/dashboard/events/[id]/match/[matchId]/page.tsx` - Pass gameSystemId
+
+**Acceptance Criteria:**
+- [ ] Score form receives gameSystemId
+- [ ] Correct scoring fields display based on game system
+
+---
+
+### [A-003] Wire gameSystemId to standings pages
+
+**Status:** [x] COMPLETED
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature A1
+**Size:** S
+**Depends on:** A-001
+
+**Description:**
+Pass gameSystemId to standings calculation for correct tiebreaker logic.
+
+**Files Modified:**
+- `src/app/(public)/events/[id]/standings/page.tsx` - Pass gameSystemId
+- `src/hooks/use-realtime-standings.ts` - Accept gameSystemId
+
+**Acceptance Criteria:**
+- [ ] Standings use correct tiebreaker order for game system
+- [ ] Real-time updates work with gameSystemId
+
+---
+
+## Phase B: Production Readiness (v1.1 Roadmap)
+
+### [B-001] Install and configure Sentry
+
+**Status:** [x] COMPLETED
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature B1
+**Size:** M
+**Depends on:** None
+
+**Description:**
+Install @sentry/nextjs and configure for error tracking.
+
+**Files Created:**
+- `sentry.client.config.ts`
+- `sentry.server.config.ts`
+- `sentry.edge.config.ts`
+
+**Files Modified:**
+- `package.json` - Add @sentry/nextjs
+- `next.config.ts` - Add Sentry webpack config
+
+**Acceptance Criteria:**
+- [ ] Sentry SDK installed
+- [ ] Client errors captured
+- [ ] Server errors captured
+- [ ] Environment separation (dev/prod)
+
+---
+
+### [B-002] Integrate Sentry with error boundaries
+
+**Status:** [x] COMPLETED
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature B1
+**Size:** S
+**Depends on:** B-001
+
+**Description:**
+Connect existing error boundaries to Sentry for automatic error reporting.
+
+**Files Modified:**
+- `src/app/error.tsx` - Add Sentry.captureException
+- `src/app/global-error.tsx` - Add Sentry.captureException
+- `src/components/ui/error-boundary.tsx` - Add Sentry integration
+
+**Acceptance Criteria:**
+- [ ] Error boundaries send errors to Sentry
+- [ ] Stack traces readable via source maps
+
+---
+
+### [B-003] Configure Sentry source maps
+
+**Status:** [x] COMPLETED
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature B1
+**Size:** S
+**Depends on:** B-001
+
+**Description:**
+Configure source map uploads to Sentry for readable stack traces.
+
+**Files Modified:**
+- `next.config.ts` - Sentry source map config
+- `.github/workflows/ci.yml` - Add source map upload step
+
+**Acceptance Criteria:**
+- [ ] Source maps uploaded during build
+- [ ] Stack traces show original TypeScript code
+
+---
+
+### [B-004] E2E test: User registration flow
+
+**Status:** [x] COMPLETED
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature B2
+**Size:** M
+**Depends on:** None
+
+**Description:**
+Write Playwright test for user registration flow.
+
+**Files Created:**
+- `e2e/auth/registration.spec.ts`
+
+**Acceptance Criteria:**
+- [ ] Test navigates to registration page
+- [ ] Test fills form and submits
+- [ ] Test verifies success state
+- [ ] Test handles error cases
+
+---
+
+### [B-005] E2E test: Tournament creation flow
+
+**Status:** [x] COMPLETED
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature B2
+**Size:** M
+**Depends on:** None
+
+**Description:**
+Write Playwright test for TO creating a tournament.
+
+**Files Created:**
+- `e2e/tournament/create.spec.ts`
+
+**Acceptance Criteria:**
+- [ ] Test logs in as TO
+- [ ] Test fills tournament form
+- [ ] Test verifies tournament created
+- [ ] Test checks tournament appears in list
+
+---
+
+### [B-006] E2E test: Player event registration
+
+**Status:** [x] COMPLETED
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature B2
+**Size:** M
+**Depends on:** None
+
+**Description:**
+Write Playwright test for player registering for event.
+
+**Files Created:**
+- `e2e/tournament/registration.spec.ts`
+
+**Acceptance Criteria:**
+- [ ] Test logs in as player
+- [ ] Test finds event
+- [ ] Test registers for event
+- [ ] Test submits army list
+
+---
+
+### [B-007] E2E test: Score entry and confirmation
+
+**Status:** [x] COMPLETED
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature B2
+**Size:** M
+**Depends on:** None
+
+**Description:**
+Write Playwright test for score entry flow.
+
+**Files Created:**
+- `e2e/scoring/score-entry.spec.ts`
+
+**Acceptance Criteria:**
+- [ ] Test navigates to match page
+- [ ] Test enters scores
+- [ ] Test confirms submission
+- [ ] Test verifies scores recorded
+
+---
+
+### [B-008] E2E test: Standings display
+
+**Status:** [x] COMPLETED
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature B2
+**Size:** M
+**Depends on:** None
+
+**Description:**
+Write Playwright test for standings page.
+
+**Files Created:**
+- `e2e/tournament/standings.spec.ts`
+
+**Acceptance Criteria:**
+- [ ] Test loads standings page
+- [ ] Test verifies player rankings
+- [ ] Test checks tiebreaker display
+
+---
+
+### [B-009] Add E2E tests to CI workflow
+
+**Status:** [x] COMPLETED
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature B2
+**Size:** S
+**Depends on:** B-004
+
+**Description:**
+Update CI workflow to run E2E tests.
+
+**Files Modified:**
+- `.github/workflows/ci.yml` - Add E2E job with Playwright
+
+**Acceptance Criteria:**
+- [ ] CI runs E2E tests on PR
+- [ ] Artifacts uploaded on failure
+- [ ] Test results visible in PR
+
+---
+
+## Phase C: Security Hardening (v1.1 Roadmap)
+
+### [C-001] Configure Google OAuth in Supabase
+
+**Status:** [x] COMPLETED
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature C1
+**Size:** S
+**Depends on:** None
+
+**Description:**
+Configure Google OAuth provider in Supabase dashboard.
+
+**Files Modified:**
+- `.env.local.example` - Document required env vars
+- `docs/SETUP.md` - Add OAuth setup instructions
+
+**Acceptance Criteria:**
+- [ ] Google OAuth configured in Supabase
+- [ ] Redirect URLs configured
+- [ ] Environment variables documented
+
+---
+
+### [C-002] Configure Discord OAuth in Supabase
+
+**Status:** [x] COMPLETED
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature C1
+**Size:** S
+**Depends on:** None
+
+**Description:**
+Configure Discord OAuth provider in Supabase dashboard.
+
+**Files Modified:**
+- `.env.local.example` - Document required env vars
+- `docs/SETUP.md` - Add OAuth setup instructions
+
+**Acceptance Criteria:**
+- [ ] Discord OAuth configured in Supabase
+- [ ] Redirect URLs configured
+- [ ] Environment variables documented
+
+---
+
+### [C-003] Add social login buttons to login page
+
+**Status:** [x] COMPLETED
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature C1
+**Size:** M
+**Depends on:** C-001, C-002
+
+**Description:**
+Add Google and Discord login buttons to the login form.
+
+**Files Modified:**
+- `src/components/auth/login-form.tsx` - Add OAuth buttons
+- `src/components/auth/social-login-buttons.tsx` - New component
+
+**Acceptance Criteria:**
+- [ ] Google login button visible
+- [ ] Discord login button visible
+- [ ] OAuth flow works on click
+- [ ] Redirect back to app after auth
+
+---
+
+### [C-004] Add account linking UI
+
+**Status:** [x] COMPLETED
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature C1
+**Size:** M
+**Depends on:** C-003
+
+**Description:**
+Allow users to link social accounts to existing email accounts.
+
+**Files Created:**
+- `src/app/dashboard/settings/accounts/page.tsx`
+- `src/components/settings/connected-accounts.tsx`
+
+**Acceptance Criteria:**
+- [ ] Settings page shows connected providers
+- [ ] Users can link additional providers
+- [ ] Users can unlink providers (keep at least one)
+
+---
+
+### [C-005] Install Upstash rate limiting packages
+
+**Status:** [x] COMPLETED
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature C2
+**Size:** S
+**Depends on:** None
+
+**Description:**
+Install @upstash/ratelimit and @upstash/redis packages.
+
+**Files Modified:**
+- `package.json` - Add dependencies
+- `.env.local.example` - Add UPSTASH_REDIS_URL, UPSTASH_REDIS_TOKEN
+
+**Acceptance Criteria:**
+- [ ] Packages installed
+- [ ] Environment variables documented
+
+---
+
+### [C-006] Create rate limiting middleware
+
+**Status:** [x] COMPLETED
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature C2
+**Size:** M
+**Depends on:** C-005
+
+**Description:**
+Create reusable rate limiting logic using Upstash.
+
+**Files Created:**
+- `src/lib/rate-limit.ts` - Rate limiter factory
+
+**Acceptance Criteria:**
+- [ ] Rate limiter configurable per endpoint
+- [ ] Returns proper headers (X-RateLimit-*)
+- [ ] Graceful fallback if Redis unavailable
+
+---
+
+### [C-007] Apply rate limits to auth endpoints
+
+**Status:** [x] COMPLETED
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature C2
+**Size:** S
+**Depends on:** C-006
+
+**Description:**
+Add rate limiting to login and registration.
+
+**Files Modified:**
+- `src/middleware.ts` - Add rate limit checks for auth routes
+
+**Acceptance Criteria:**
+- [ ] 5 login attempts per minute per IP
+- [ ] Clear error message when rate limited
+
+---
+
+### [C-008] Apply rate limits to score submission
+
+**Status:** [x] COMPLETED
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature C2
+**Size:** S
+**Depends on:** C-006
+
+**Description:**
+Add rate limiting to score submission endpoints.
+
+**Files Modified:**
+- `src/middleware.ts` - Add rate limit for score routes
+
+**Acceptance Criteria:**
+- [ ] 30 submissions per minute per user
+- [ ] Rate limit by user ID, not IP
+
+---
+
+### [C-009] Audit inline scripts for CSP
+
+**Status:** [x] COMPLETED
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature C3
+**Size:** M
+**Depends on:** None
+
+**Description:**
+Audit codebase for inline scripts and styles that violate CSP.
+
+**Files Created:**
+- `docs/CSP-AUDIT.md` - Audit findings
+
+**Acceptance Criteria:**
+- [ ] All inline scripts identified
+- [ ] All inline styles identified
+- [ ] Plan for each violation
+
+---
+
+### [C-010] Implement CSP nonces
+
+**Status:** [x] COMPLETED
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature C3
+**Size:** M
+**Depends on:** C-009
+
+**Description:**
+Add nonce generation for legitimate inline scripts.
+
+**Files Modified:**
+- `src/middleware.ts` - Generate nonce per request
+- `src/app/layout.tsx` - Use nonce in script tags
+- `next.config.ts` - Update CSP header
+
+**Acceptance Criteria:**
+- [ ] Nonces generated per request
+- [ ] Inline scripts use nonces
+- [ ] CSP allows nonced scripts
+
+---
+
+### [C-011] Enable enforced CSP
+
+**Status:** [x] COMPLETED
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature C3
+**Size:** S
+**Depends on:** C-010
+
+**Description:**
+Change CSP from report-only to enforced.
+
+**Files Modified:**
+- `next.config.ts` - Change header name
+
+**Acceptance Criteria:**
+- [ ] Content-Security-Policy header (not Report-Only)
+- [ ] No CSP violations in normal operation
+- [ ] OBS overlay still works
+
+---
+
+### [C-012] Implement CSRF token generation
+
+**Status:** [x] COMPLETED
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature C4
+**Size:** M
+**Depends on:** None
+
+**Description:**
+Create CSRF token generation and validation utilities.
+
+**Files Created:**
+- `src/lib/csrf.ts` - Token generation and validation
+
+**Acceptance Criteria:**
+- [ ] Tokens generated per session
+- [ ] Tokens stored securely
+- [ ] Validation function available
+
+---
+
+### [C-013] Add CSRF validation to server actions
+
+**Status:** [x] COMPLETED
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature C4
+**Size:** M
+**Depends on:** C-012
+
+**Description:**
+Add CSRF validation to all state-changing server actions.
+
+**Files Modified:**
+- `src/lib/admin/actions.ts` - Add CSRF check
+- `src/components/scoring/score-form.tsx` - Include token
+- Other server action files
+
+**Acceptance Criteria:**
+- [ ] All mutations validate CSRF token
+- [ ] Clear error on CSRF failure
+
+---
+
+### [C-014] Add CSRF tokens to all forms
+
+**Status:** [x] COMPLETED
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature C4
+**Size:** M
+**Depends on:** C-012
+
+**Description:**
+Include CSRF token in all form submissions.
+
+**Files Created:**
+- `src/components/ui/csrf-input.tsx` - Hidden CSRF input component
+
+**Files Modified:**
+- All form components - Add CSRF input
+
+**Acceptance Criteria:**
+- [ ] All forms include CSRF token
+- [ ] Token auto-refreshes as needed
+
+---
+
+## Phase D: Engagement (v1.2 Roadmap)
+
+### [D-001] Create achievements database schema
+
+**Status:** [x] COMPLETED
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature D1
+**Size:** S
+**Depends on:** None
+
+**Description:**
+Create database tables for achievements system.
+
+**Files Created:**
+- `supabase/migrations/007_achievements.sql`
+
+**Schema:**
+- achievements (id, name, description, category, icon, criteria_type, criteria_value)
+- user_achievements (user_id, achievement_id, unlocked_at, progress)
+
+**Acceptance Criteria:**
+- [ ] Tables created with proper indexes
+- [ ] Foreign keys to users table
+- [ ] RLS policies for read access
+
+---
+
+### [D-002] Define initial achievement set
+
+**Status:** [x] COMPLETED
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature D1
+**Size:** M
+**Depends on:** D-001
+
+**Description:**
+Create TypeScript definitions and seed data for initial achievements.
+
+**Files Created:**
+- `src/lib/achievements/definitions.ts` - Achievement definitions
+- `supabase/seed/achievements.sql` - Seed data
+
+**Achievements:**
+- First Tournament, First Win, Tournament Champion
+- 10 Tournaments, 50 Tournaments, 100 Tournaments
+- Faction Loyalist, Master of All
+- TO Badge, Early Adopter
+
+**Acceptance Criteria:**
+- [ ] 10+ achievements defined
+- [ ] Categories: Participation, Performance, Faction, Community
+- [ ] Clear criteria for each
+
+---
+
+### [D-003] Create achievement unlock logic
+
+**Status:** [x] COMPLETED
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature D1
+**Size:** L
+**Depends on:** D-002
+
+**Description:**
+Implement achievement checking and unlock logic.
+
+**Files Created:**
+- `src/lib/achievements/checker.ts` - Check and unlock achievements
+- `src/lib/achievements/hooks.ts` - React hooks for achievements
+
+**Trigger Points:**
+- After match completion
+- After tournament completion
+- After registration
+
+**Acceptance Criteria:**
+- [ ] Achievements check on relevant events
+- [ ] Unlocks stored in database
+- [ ] No duplicate unlocks
+
+---
+
+### [D-004] Add achievements to player profile
+
+**Status:** [x] COMPLETED
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature D1
+**Size:** M
+**Depends on:** D-003
+
+**Description:**
+Display earned achievements on player profile page.
+
+**Files Created:**
+- `src/components/achievements/achievement-badge.tsx`
+- `src/components/achievements/achievement-grid.tsx`
+
+**Files Modified:**
+- `src/app/(public)/players/[id]/page.tsx` - Add achievements section
+
+**Acceptance Criteria:**
+- [ ] Achievements display as badges
+- [ ] Hover shows details
+- [ ] Progress shown for incomplete achievements
+
+---
+
+### [D-005] Create achievement notification component
+
+**Status:** [x] COMPLETED
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature D1
+**Size:** M
+**Depends on:** D-003
+
+**Description:**
+Show notification when achievement is unlocked.
+
+**Files Created:**
+- `src/components/achievements/achievement-toast.tsx`
+- `src/components/achievements/achievement-modal.tsx`
+
+**Acceptance Criteria:**
+- [ ] Toast notification on unlock
+- [ ] Click opens detail modal
+- [ ] Animation/celebration effect
+
+---
+
+### [D-006] Add shareable achievement cards
+
+**Status:** [x] COMPLETED
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature D1
+**Size:** M
+**Depends on:** D-004
+
+**Description:**
+Create shareable achievement cards for social media.
+
+**Files Created:**
+- `src/app/api/og/achievement/[id]/route.tsx` - OG image generation
+
+**Acceptance Criteria:**
+- [ ] OG image generated for achievements
+- [ ] Proper social preview metadata
+- [ ] Works on Twitter, Discord, etc.
+
+---
+
+## Phase E: Platform Growth (v2 Roadmap)
+
+### [E-001] Research ITS API integration
+
+**Status:** [ ] PENDING
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature E1
+**Size:** L
+**Depends on:** None
+**Blocked:** Requires Corvus Belli partnership
+
+**Description:**
+Research and document ITS API requirements and capabilities.
+
+**Files Created:**
+- `docs/ITS-API-RESEARCH.md`
+
+**Acceptance Criteria:**
+- [ ] API endpoints documented
+- [ ] Authentication method identified
+- [ ] Data model mapping complete
+
+---
+
+### [E-002] Implement ITS sync
+
+**Status:** [ ] PENDING
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature E1
+**Size:** XL
+**Depends on:** E-001
+**Blocked:** Requires API access
+
+**Description:**
+Implement tournament results sync to official ITS system.
+
+**Files Created:**
+- `src/lib/its/client.ts` - ITS API client
+- `src/lib/its/sync.ts` - Sync logic
+
+**Acceptance Criteria:**
+- [ ] Tournament registration syncs
+- [ ] Results submission works
+- [ ] Error handling robust
+
+---
+
+### [E-003] Set up Stripe integration
+
+**Status:** [ ] PENDING
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature E2
+**Size:** L
+**Depends on:** None
+
+**Description:**
+Install Stripe SDK and configure account.
+
+**Files Created:**
+- `src/lib/stripe/client.ts` - Stripe client
+- `src/lib/stripe/webhooks.ts` - Webhook handler
+
+**Files Modified:**
+- `package.json` - Add stripe package
+- `.env.local.example` - Add Stripe keys
+
+**Acceptance Criteria:**
+- [ ] Stripe SDK installed
+- [ ] Test mode working
+- [ ] Webhook endpoint configured
+
+---
+
+### [E-004] Add payment flow to registration
+
+**Status:** [ ] PENDING
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature E2
+**Size:** L
+**Depends on:** E-003
+
+**Description:**
+Add optional payment during tournament registration.
+
+**Files Created:**
+- `src/components/tournament/payment-form.tsx`
+- `src/app/api/stripe/create-checkout/route.ts`
+
+**Files Modified:**
+- `src/components/tournament/create-tournament-form.tsx` - Add price field
+
+**Acceptance Criteria:**
+- [ ] TO can set entry fee
+- [ ] Players pay during registration
+- [ ] Payment status tracked
+
+---
+
+### [E-005] Create TO payout system
+
+**Status:** [ ] PENDING
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature E2
+**Size:** L
+**Depends on:** E-004
+
+**Description:**
+Allow TOs to receive payouts from tournament fees.
+
+**Files Created:**
+- `src/app/to/payouts/page.tsx`
+- `src/lib/stripe/payouts.ts`
+
+**Acceptance Criteria:**
+- [ ] TO connects Stripe account
+- [ ] Payouts transferred after event
+- [ ] Fee reporting available
+
+---
+
+### [E-006] Enhance offline sync for full offline mode
+
+**Status:** [ ] PENDING
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature E3
+**Size:** XL
+**Depends on:** None
+
+**Description:**
+Expand offline capabilities for complete offline operation.
+
+**Files Modified:**
+- `packages/shared/src/sync/engine.ts` - Full offline support
+- `public/sw.js` - Enhanced caching
+
+**Acceptance Criteria:**
+- [ ] All operations work offline
+- [ ] Conflict resolution for simultaneous edits
+- [ ] Clear offline indicator
+
+---
+
+### [E-007] Design chat data model
+
+**Status:** [ ] PENDING
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature E4
+**Size:** M
+**Depends on:** None
+
+**Description:**
+Design database schema for messaging system.
+
+**Files Created:**
+- `supabase/migrations/008_messaging.sql`
+- `docs/MESSAGING-DESIGN.md`
+
+**Schema:**
+- conversations (id, type, tournament_id)
+- messages (id, conversation_id, sender_id, content, sent_at)
+- conversation_participants (conversation_id, user_id)
+
+**Acceptance Criteria:**
+- [ ] Schema supports 1:1 and group chats
+- [ ] Tournament announcements supported
+- [ ] Message history preserved
+
+---
+
+### [E-008] Implement real-time chat
+
+**Status:** [ ] PENDING
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature E4
+**Size:** L
+**Depends on:** E-007
+
+**Description:**
+Build real-time chat using Supabase Realtime.
+
+**Files Created:**
+- `src/components/chat/chat-window.tsx`
+- `src/components/chat/message-list.tsx`
+- `src/hooks/use-chat.ts`
+
+**Acceptance Criteria:**
+- [ ] Real-time message delivery
+- [ ] Read receipts
+- [ ] Typing indicators
+
+---
+
+### [E-009] Add chat moderation tools
+
+**Status:** [ ] PENDING
+**Spec:** `docs/PRD-v1.1-v2-Roadmap.md` Feature E4
+**Size:** M
+**Depends on:** E-008
+
+**Description:**
+Add moderation tools for chat system.
+
+**Files Created:**
+- `src/app/admin/moderation/page.tsx`
+- `src/lib/moderation/actions.ts`
+
+**Acceptance Criteria:**
+- [ ] Report message functionality
+- [ ] Admin can delete messages
+- [ ] User muting/banning

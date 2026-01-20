@@ -285,3 +285,29 @@ export interface ApiError {
   code?: string;
   details?: unknown;
 }
+
+// ============================================================================
+// Achievements System
+// ============================================================================
+
+export interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  category: 'participation' | 'performance' | 'faction' | 'community';
+  icon: string;
+  criteria_type: 'count' | 'boolean' | 'threshold';
+  criteria_field: string | null;
+  criteria_value: number | null;
+  points: number;
+  created_at: string;
+}
+
+export interface UserAchievement {
+  id: string;
+  user_id: string;
+  achievement_id: string;
+  unlocked_at: string;
+  progress: number;
+  achievement?: Achievement;
+}
