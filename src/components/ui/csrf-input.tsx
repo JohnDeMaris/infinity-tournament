@@ -24,9 +24,13 @@ async function fetchCsrfToken(): Promise<string> {
     return tokenFetchPromise;
   }
 
-  // Fetch new token
-  tokenFetchPromise = fetch('/api/csrf-token')
+  // Fetch new token with 5-second timeout
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+  tokenFetchPromise = fetch('/api/csrf-token', { signal: controller.signal })
     .then((res) => {
+      clearTimeout(timeoutId);
       if (!res.ok) {
         throw new Error('Failed to fetch CSRF token');
       }
@@ -38,7 +42,11 @@ async function fetchCsrfToken(): Promise<string> {
       return data.token;
     })
     .catch((err) => {
+      clearTimeout(timeoutId);
       tokenFetchPromise = null;
+      if (err.name === 'AbortError') {
+        throw new Error('CSRF token fetch timed out');
+      }
       throw err;
     });
 
@@ -48,11 +56,13 @@ async function fetchCsrfToken(): Promise<string> {
 export function CsrfInput() {
   const [token, setToken] = useState<string | null>(cachedToken);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(!cachedToken);
 
   useEffect(() => {
     // If we already have a cached token, use it
     if (cachedToken) {
       setToken(cachedToken);
+      setIsLoading(false);
       return;
     }
 
@@ -61,34 +71,26 @@ export function CsrfInput() {
       .then((fetchedToken) => {
         setToken(fetchedToken);
         setError(null);
+        setIsLoading(false);
       })
       .catch((err) => {
         console.error('Failed to fetch CSRF token:', err);
         setError(err.message);
+        setIsLoading(false);
       });
   }, []);
 
-  if (error) {
-    // In development, show a warning but allow the form to render
-    // In production, this should be handled more gracefully
-    if (process.env.NODE_ENV === 'development') {
-      console.warn('CSRF token fetch failed:', error);
-    }
-    return null;
-  }
-
-  // Don't render the input until we have a token
-  // This prevents form submission without CSRF protection
-  if (!token) {
-    return null;
-  }
-
+  // Render hidden input with empty value while loading or on error
+  // This allows the form to render immediately without blocking
+  // Server-side validation will catch missing/invalid tokens on submit
   return (
     <input
       type="hidden"
       name="csrf_token"
-      value={token}
+      value={token || ''}
       data-csrf-input
+      data-csrf-loading={isLoading}
+      data-csrf-error={error || undefined}
     />
   );
 }

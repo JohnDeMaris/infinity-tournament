@@ -44,7 +44,7 @@ export function TournamentCard({
     registeredCount >= tournament.max_capacity;
 
   return (
-    <Link href={`/events/${tournament.id}`}>
+    <Link href={`/events/${tournament.id}`} className="block h-full">
       <Card className="h-full hover:shadow-md transition-shadow cursor-pointer">
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between gap-2">
