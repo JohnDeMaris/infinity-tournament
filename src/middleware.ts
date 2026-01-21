@@ -18,7 +18,7 @@ function generateCSP(): string {
   ].join('; ');
 }
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   // Apply rate limiting to authentication API endpoints only
