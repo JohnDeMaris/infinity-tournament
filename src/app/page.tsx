@@ -63,23 +63,26 @@ export default async function HomePage() {
             standings.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/events">
-              <Button size="lg" className="w-full sm:w-auto">
-                Browse Events
-              </Button>
+            <Link
+              href="/events"
+              className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-10 rounded-md px-6 w-full sm:w-auto"
+            >
+              Browse Events
             </Link>
             {!user && (
-              <Link href="/register">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto">
-                  Create Account
-                </Button>
+              <Link
+                href="/register"
+                className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium border bg-background hover:bg-accent hover:text-accent-foreground h-10 rounded-md px-6 w-full sm:w-auto"
+              >
+                Create Account
               </Link>
             )}
             {user && (user.role === 'to' || user.role === 'admin') && (
-              <Link href="/to/create">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto">
-                  Create Tournament
-                </Button>
+              <Link
+                href="/to/create"
+                className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium border bg-background hover:bg-accent hover:text-accent-foreground h-10 rounded-md px-6 w-full sm:w-auto"
+              >
+                Create Tournament
               </Link>
             )}
           </div>
@@ -169,9 +172,9 @@ export default async function HomePage() {
           <div className="container max-w-6xl mx-auto">
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-2xl font-bold">Upcoming Events</h2>
-              <Link href="/events">
-                <Button variant="ghost">View all</Button>
-              </Link>
+              <Button asChild variant="ghost">
+                <Link href="/events">View all</Link>
+              </Button>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {tournamentsWithCounts.map((tournament) => (

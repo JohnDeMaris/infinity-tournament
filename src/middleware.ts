@@ -2,10 +2,14 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
 import { rateLimiters, checkRateLimit, applyRateLimitHeaders } from '@/lib/rate-limit';
 
-function generateCSP(nonce: string): string {
+function generateCSP(): string {
+  // Note: 'unsafe-inline' is required for Next.js scripts to work
+  // until proper nonce propagation is implemented via Next.js 16's
+  // experimental.serverActions.allowedOrigins or a custom Script component.
+  // See: https://nextjs.org/docs/app/building-your-application/configuring/content-security-policy
   return [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob:",
     "font-src 'self'",
@@ -17,14 +21,9 @@ function generateCSP(nonce: string): string {
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
-  // Generate a unique nonce for CSP
-  const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
-
-  // Apply rate limiting to authentication endpoints
-  const isAuthRoute =
-    pathname.startsWith('/api/auth/') ||
-    pathname === '/login' ||
-    pathname === '/register';
+  // Apply rate limiting to authentication API endpoints only
+  // Note: We don't rate limit page views (/login, /register) - only actual auth actions
+  const isAuthRoute = pathname.startsWith('/api/auth/');
 
   if (isAuthRoute) {
     // Use IP address as identifier for rate limiting (Next.js 16+ compatible)
@@ -52,9 +51,8 @@ export async function middleware(request: NextRequest) {
     const sessionResponse = await updateSession(request);
     const responseWithHeaders = applyRateLimitHeaders(sessionResponse, rateLimitResult);
 
-    // Add nonce header and CSP for this request
-    responseWithHeaders.headers.set('x-nonce', nonce);
-    responseWithHeaders.headers.set('Content-Security-Policy', generateCSP(nonce));
+    // Add CSP header
+    responseWithHeaders.headers.set('Content-Security-Policy', generateCSP());
 
     return responseWithHeaders;
   }
@@ -62,9 +60,8 @@ export async function middleware(request: NextRequest) {
   // Non-auth routes: proceed with normal session handling
   const sessionResponse = await updateSession(request);
 
-  // Add nonce header and CSP for this request
-  sessionResponse.headers.set('x-nonce', nonce);
-  sessionResponse.headers.set('Content-Security-Policy', generateCSP(nonce));
+  // Add CSP header
+  sessionResponse.headers.set('Content-Security-Policy', generateCSP());
 
   return sessionResponse;
 }

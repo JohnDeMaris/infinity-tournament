@@ -179,11 +179,17 @@ export function Header({ user }: HeaderProps) {
             </>
           ) : (
             <>
-              <Link href="/login">
-                <Button variant="ghost">Sign in</Button>
+              <Link
+                href="/login"
+                className="inline-flex items-center justify-center rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
+              >
+                Sign in
               </Link>
-              <Link href="/register" className="hidden sm:block">
-                <Button>Sign up</Button>
+              <Link
+                href="/register"
+                className="hidden sm:inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2"
+              >
+                Sign up
               </Link>
             </>
           )}

@@ -54,9 +54,9 @@ export default async function TODashboardPage() {
             Create and manage your tournaments
           </p>
         </div>
-        <Link href="/to/create">
-          <Button>Create Tournament</Button>
-        </Link>
+        <Button asChild>
+          <Link href="/to/create">Create Tournament</Link>
+        </Button>
       </div>
 
       {/* Active Tournaments */}
@@ -65,8 +65,8 @@ export default async function TODashboardPage() {
           <h2 className="text-xl font-semibold mb-4">Active Now</h2>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {activeTournaments.map((tournament) => (
-              <Link key={tournament.id} href={`/to/${tournament.id}`}>
-                <Card className="hover:shadow-md transition-shadow cursor-pointer border-blue-500/50">
+              <Link key={tournament.id} href={`/to/${tournament.id}`} className="block">
+                <Card className="hover:shadow-md transition-shadow border-blue-500/50">
                   <CardHeader className="pb-2">
                     <div className="flex items-start justify-between">
                       <CardTitle className="text-lg">{tournament.name}</CardTitle>
@@ -102,16 +102,16 @@ export default async function TODashboardPage() {
               <p className="text-muted-foreground mb-4">
                 No upcoming tournaments. Create one to get started!
               </p>
-              <Link href="/to/create">
-                <Button>Create Tournament</Button>
-              </Link>
+              <Button asChild>
+                <Link href="/to/create">Create Tournament</Link>
+              </Button>
             </CardContent>
           </Card>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {upcomingTournaments.map((tournament) => (
-              <Link key={tournament.id} href={`/to/${tournament.id}`}>
-                <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <Link key={tournament.id} href={`/to/${tournament.id}`} className="block">
+                <Card className="hover:shadow-md transition-shadow">
                   <CardHeader className="pb-2">
                     <div className="flex items-start justify-between">
                       <CardTitle className="text-lg">{tournament.name}</CardTitle>
@@ -144,8 +144,8 @@ export default async function TODashboardPage() {
           <h2 className="text-xl font-semibold mb-4">Past</h2>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {pastTournaments.map((tournament) => (
-              <Link key={tournament.id} href={`/to/${tournament.id}`}>
-                <Card className="hover:shadow-md transition-shadow cursor-pointer opacity-75">
+              <Link key={tournament.id} href={`/to/${tournament.id}`} className="block">
+                <Card className="hover:shadow-md transition-shadow opacity-75">
                   <CardHeader className="pb-2">
                     <div className="flex items-start justify-between">
                       <CardTitle className="text-lg">{tournament.name}</CardTitle>

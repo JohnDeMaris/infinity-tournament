@@ -45,7 +45,7 @@ export function TournamentCard({
 
   return (
     <Link href={`/events/${tournament.id}`} className="block h-full">
-      <Card className="h-full hover:shadow-md transition-shadow cursor-pointer">
+      <Card className="h-full hover:shadow-md transition-shadow">
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between gap-2">
             <CardTitle className="text-lg line-clamp-2">
