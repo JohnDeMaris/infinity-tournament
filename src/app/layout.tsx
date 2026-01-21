@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import { Providers } from '@/components/providers';
 import { Toaster } from '@/components/ui/sonner';
-import { SyncProvider } from '@/components/providers/sync-provider';
+// import { SyncProvider } from '@/components/providers/sync-provider';
 import { SafariInstallPrompt } from '@/components/pwa';
 import './globals.css';
 
@@ -64,17 +65,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="apple-touch-icon" href="/icon-192.png" />
-      </head>
+      <head />
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-background`}
       >
-        <SyncProvider>
+        <Providers>
+          {/* SyncProvider disabled - causes slow loads by fetching all data on init */}
+          {/* TODO: Re-enable only in /dashboard layout when offline support needed */}
           {children}
-        </SyncProvider>
-        <Toaster />
-        <SafariInstallPrompt />
+          <Toaster />
+          <SafariInstallPrompt />
+        </Providers>
       </body>
     </html>
   );
